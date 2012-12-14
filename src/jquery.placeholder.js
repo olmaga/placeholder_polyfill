@@ -16,17 +16,42 @@
     function hidePlaceholder (input, options) {
         input.addClass(options.hideClass);
     }
-    function positionPlaceholder (placeholder, input) {
+    function positionPlaceholder (placeholder, label, input) {
         var ta = input.is('textarea');
 
+        // padding + margin + border
+        var padleft = parseInt(input.css("padding-left").replace("px"), 10);
+        var margleft = parseInt(input.css("margin-left").replace("px"), 10);
+        var bordleft = parseInt(input.css("border-left-width").replace("px"), 10);
+        var left = (padleft ? padleft : 0) + (margleft ? margleft : 0) + (bordleft ? bordleft : 0);
+
+        // just seems to be right to do one pixel less
+        var padtop = parseInt(input.css("padding-top").replace("px"), 10);
+        var margtop = parseInt(input.css("margin-top").replace("px"), 10);
+        var bordtop = parseInt(input.css("border-top-width").replace("px"), 10);
+        var top = (padtop ? padtop : 0) + (margtop ? margtop : 0) + (bordtop ? bordtop : 0) + 1;
+
+        // inputs have just the height of the input as line-height to be vertically aligned
+        var lineheight = input.outerHeight();
+        if (ta) {
+            // if a textarea, the lineheight is set to either the line-height of the textarea (if set)
+            var lh = parseInt(input.css("line-height").replace("px"), 10);
+            if (isNaN(lh)) {
+                // if not we set it to 1.3 times the font-size
+                lineheight = parseInt(input.css("font-size").replace("px"), 10) * 1.3;
+            } else {
+                lineheight = lh;
+            }
+            // and we add the padding/margin/border
+            lineheight += top * 2;
+        }
         placeholder.css({
-            width: input.innerWidth() - (ta ? 20 : 4),
-            height: input.outerHeight() + "px",
-            "line-height": ta ? input.css("line-height") : input.outerHeight() + "px",
-            whiteSpace: ta ? 'normal' : 'nowrap',
-            overflow: 'hidden',
-            "padding-left": (parseInt(input.css("padding-left").replace("px"),10) +2) + "px",
-            "margin-top": input.css("margin-top")
+            "font-size": input.css("font-size"),
+            "line-height": lineheight + "px",
+            "padding-left": left + "px",
+            "overflow": 'hidden',
+            "width": input.outerWidth() + "px",
+            "height": input.outerHeight() + "px"
         });
     }
     function startFilledCheckChange (input, label, options) {
@@ -89,7 +114,7 @@
             // already added a polyfill?
             var polyfilled = $(label).find('.placeholder');
             if (polyfilled.size() > 0) {
-                positionPlaceholder(polyfilled, input);
+                positionPlaceholder(polyfilled, label, input);
                 polyfilled.text(txt);
                 return input;
             }
@@ -109,13 +134,17 @@
 
             // pass the focus onclick ie7 needs a timeout here
             label.click(function () {
-                setTimeout(function() { input.focus(); }, 1);
+                setTimeout(function () {
+                    input.focus();
+                }, 1);
             });
             placeholder.click(function () {
-                setTimeout(function() { input.focus(); }, 1);
+                setTimeout(function () {
+                    input.focus();
+                }, 1);
             });
 
-            positionPlaceholder(placeholder, input);
+            positionPlaceholder(placeholder, label, input);
 
             input.focusout(function () {
                 showPlaceholderIfEmpty(input, label, o.options);
@@ -134,12 +163,12 @@
             if (window.requestAnimationFrame) {
                 startFilledCheckChange(input, label, o.options);
             }
-            
+
             showPlaceholderIfEmpty(input, label, o.options);
 
             // reformat on window resize and optional reformat on font resize - requires: http://www.tomdeater.com/jquery/onfontresize/
             $(document).bind("fontresize resize", function () {
-                positionPlaceholder(placeholder, input);
+                positionPlaceholder(placeholder, label, input);
             });
             return this;
         });
