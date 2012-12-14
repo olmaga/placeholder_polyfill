@@ -16,12 +16,12 @@ Even in newer browsers (e.g. IE10) placeholders are hidden on focus.
 Tested in IE 7 - 10
 
 ## HowTo
-`
-	<input type="text" placeholder="Enter some text"/>
-	<script>
-		$("input").polyfill_placeholder();
-	</script>
-`
+
+    <input type="text" placeholder="Enter some text"/>
+    <script>
+        $("input").polyfill_placeholder();
+    </script>
+
 Thats all the magic.
 
 ## Demos
